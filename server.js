@@ -64,7 +64,7 @@ app.post('/api/exercise/add', (req, res, next) => {
 });
 
 app.get('/api/exercise/log', (req, res, next) => {
-  model.exercise.list(req.query.userId, (err, user) => {
+  model.exercise.list(req.query.userId, req.query.from, req.query.to, req.query.limit, (err, user) => {
     if (err) {
       next(err);
     } else {

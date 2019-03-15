@@ -67,13 +67,18 @@ function createExercise(userId, description, duration, date, done) {
     });
 }
 
-function getExerciseList(userId, done) {
+function getExerciseList(userId, from, to, limit, done) {
     var objId = parseObjectId(userId);
     if (!objId) {
         done(new StatusError(400, 'missing or invalid userId.'));
         return;
     }
-    User.findById(objId).populate('exercises').exec(done);
+    var dateFilter = getDateFilter(from, to);
+    User.findById(objId).populate({
+        path: 'exercises',
+        match: dateFilter ? { date: dateFilter } : undefined,
+        options: limit ? { limit: limit } : undefined
+    }).exec(done);
 }
 
 function checkUniqueUsername(username, done) {
@@ -92,6 +97,20 @@ function parseObjectId(value) {
     } catch (ex) {
         return null;
     }
+}
+
+function getDateFilter(from, to) {
+    if (!from && !to) {
+        return null;
+    }
+    var filter = {};
+    if (from) {
+        filter.$gt = from;
+    }
+    if (to) {
+        filter.$lt = to;
+    }
+    return filter;
 }
 
 function StatusError(status, message) {
